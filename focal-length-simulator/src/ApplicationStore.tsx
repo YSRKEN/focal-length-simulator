@@ -1,12 +1,13 @@
 import React from 'react';
 import { Action, SENSOR_SIZE_DICT, ASPECT_RATIO_DICT } from './constant';
+import { Decimal } from 'decimal.js';
 
 const useStore = () => {
-  const [sensorSize, setSensorSize] = React.useState('4.MFT');
+  const [sensorSize, setSensorSize] = React.useState('6');
   const [focalLength, setFocalLength] = React.useState('50');
   const [distance, setDistance] = React.useState('2.0');
   const [fNumber, setFNumber] = React.useState('1.7');
-  const [aspectRatio, setAspectRatio] = React.useState('3.43');
+  const [aspectRatio, setAspectRatio] = React.useState('3');
   const [result, setResult] = React.useState('');
 
   React.useEffect(() => {
@@ -86,12 +87,25 @@ const useStore = () => {
     fNumber: string,
     aspectRatio: string,
   ) => {
-    let text = `センサーサイズ：${SENSOR_SIZE_DICT[sensorSize]}\n`;
+    let text = `センサーサイズ：${SENSOR_SIZE_DICT[sensorSize].name}(${SENSOR_SIZE_DICT[sensorSize].width}x${SENSOR_SIZE_DICT[sensorSize].height}mm)\n`;
     text += `焦点距離：${focalLength}[mm]\n`;
     text += `対象との距離：${distance}[m]\n`;
     text += `Fナンバー：${fNumber}\n`;
-    text += `アスペクト比：${ASPECT_RATIO_DICT[aspectRatio]}\n`;
-    return text;
+    text += `アスペクト比：${ASPECT_RATIO_DICT[aspectRatio].name}`;
+
+    // 入力チェック
+    try {
+      const width2 = new Decimal(SENSOR_SIZE_DICT[sensorSize].width);
+      const height2 = new Decimal(SENSOR_SIZE_DICT[sensorSize].height);
+      const focalLength2 = new Decimal(focalLength);
+      const distance2 = new Decimal(distance);
+      const fNumber2 = new Decimal(fNumber);
+
+      // チェック完了後の処理
+      return text;
+    } catch (e) {
+      return 'エラー：入力値に数字ではない文字が含まれています';
+    }
   };
 
   return {

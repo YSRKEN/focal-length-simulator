@@ -43,7 +43,7 @@ const CalcForm: React.FC = () => {
         >
           {Object.keys(SENSOR_SIZE_DICT).map((value, key) => (
             <option value={value} key={key}>
-              {SENSOR_SIZE_DICT[value]}
+              {SENSOR_SIZE_DICT[value].name}
             </option>
           ))}
         </Form.Control>
@@ -81,7 +81,7 @@ const CalcForm: React.FC = () => {
         >
           {Object.keys(ASPECT_RATIO_DICT).map((value, key) => (
             <option value={value} key={key}>
-              {ASPECT_RATIO_DICT[value]}
+              {ASPECT_RATIO_DICT[value].name}
             </option>
           ))}
         </Form.Control>
