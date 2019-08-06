@@ -18,7 +18,7 @@ const App: React.FC = () => {
             <h2 className="text-center">画角シミュレーター</h2>
             <div className="text-center">
               <span>
-                Ver.{VERSION} <a href={TWITTER_URL}>作者Twitter</a>{' '}
+                Ver.{VERSION}　<a href={TWITTER_URL}>作者Twitter</a>　
                 <a href={GITHUB_URL}>GitHub</a>
               </span>
             </div>

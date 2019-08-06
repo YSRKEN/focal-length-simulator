@@ -1,6 +1,28 @@
 import Decimal from 'decimal.js';
 
 /**
+ * ローカルストレージから設定を読み込む
+ * @param key キー
+ * @param defaultValue デフォルト値
+ */
+export const loadSetting = (key: string, defaultValue: string) => {
+  if (window.localStorage.getItem(key) === null) {
+    return defaultValue;
+  } else {
+    return window.localStorage.getItem(key) as string;
+  }
+};
+
+/**
+ * ローカルストレージに設定を保存する
+ * @param key キー
+ * @param value 値
+ */
+export const saveSetting = (key: string, value: string) => {
+  window.localStorage.setItem(key, value);
+};
+
+/**
  * センサーサイズのうち、実際に使用されている大きさを算出する。なお、アスペクト比が縦向きの場合は自動回転する
  * @param sensorWidth センサーサイズ(長辺)
  * @param sensorHeight センサーサイズ(短辺)
