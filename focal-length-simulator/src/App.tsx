@@ -1,26 +1,26 @@
 import React from 'react';
-import logo from './logo.svg';
+import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
+import { Container, Row, Col } from 'react-bootstrap';
+import useStore from './ApplicationStore';
+import StateContext from './context';
+import CalcForm from './CalcForm';
 
 const App: React.FC = () => {
+  const context = useStore();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <StateContext.Provider value={context}>
+      <Container>
+        <Row>
+          <Col className="mx-auto my-3" xs={12} md={6}>
+            <h2 className="text-center">画角シミュレーター</h2>
+            <CalcForm />
+          </Col>
+        </Row>
+      </Container>
+    </StateContext.Provider>
   );
-}
+};
 
 export default App;
