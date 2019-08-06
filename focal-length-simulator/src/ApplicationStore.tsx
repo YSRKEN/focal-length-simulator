@@ -1,6 +1,7 @@
 import React from 'react';
 import { Action, SENSOR_SIZE_DICT, ASPECT_RATIO_DICT } from './constant';
 import { Decimal } from 'decimal.js';
+import { calcActualSensorSize } from './utility';
 
 const useStore = () => {
   const [sensorSize, setSensorSize] = React.useState('6');
@@ -14,69 +15,24 @@ const useStore = () => {
     setResult(
       calcResultText(sensorSize, focalLength, distance, fNumber, aspectRatio),
     );
-  }, []);
+  }, [sensorSize, focalLength, distance, fNumber, aspectRatio]);
 
   const dispatch = (action: Action) => {
     switch (action.type) {
       case 'setSensorSize':
         setSensorSize(action.message);
-        setResult(
-          calcResultText(
-            action.message,
-            focalLength,
-            distance,
-            fNumber,
-            aspectRatio,
-          ),
-        );
         break;
       case 'setFocalLength':
         setFocalLength(action.message);
-        setResult(
-          calcResultText(
-            sensorSize,
-            action.message,
-            distance,
-            fNumber,
-            aspectRatio,
-          ),
-        );
         break;
       case 'setDistance':
         setDistance(action.message);
-        setResult(
-          calcResultText(
-            sensorSize,
-            focalLength,
-            action.message,
-            fNumber,
-            aspectRatio,
-          ),
-        );
         break;
       case 'setFNumber':
         setFNumber(action.message);
-        setResult(
-          calcResultText(
-            sensorSize,
-            focalLength,
-            distance,
-            action.message,
-            aspectRatio,
-          ),
-        );
         break;
       case 'setAspectRatio':
         setAspectRatio(action.message);
-        setResult(
-          calcResultText(
-            sensorSize,
-            focalLength,
-            distance,
-            fNumber,
-            action.message,
-          ),
-        );
     }
   };
 
@@ -87,19 +43,32 @@ const useStore = () => {
     fNumber: string,
     aspectRatio: string,
   ) => {
-    let text = `センサーサイズ：${SENSOR_SIZE_DICT[sensorSize].name}(${SENSOR_SIZE_DICT[sensorSize].width}x${SENSOR_SIZE_DICT[sensorSize].height}mm)\n`;
-    text += `焦点距離：${focalLength}[mm]\n`;
-    text += `対象との距離：${distance}[m]\n`;
-    text += `Fナンバー：${fNumber}\n`;
-    text += `アスペクト比：${ASPECT_RATIO_DICT[aspectRatio].name}`;
-
     // 入力チェック
     try {
-      const width2 = new Decimal(SENSOR_SIZE_DICT[sensorSize].width);
-      const height2 = new Decimal(SENSOR_SIZE_DICT[sensorSize].height);
-      const focalLength2 = new Decimal(focalLength);
-      const distance2 = new Decimal(distance);
-      const fNumber2 = new Decimal(fNumber);
+      // データの読み取り
+      const sensorWidth = new Decimal(SENSOR_SIZE_DICT[sensorSize].width);
+      const sensorHeight = new Decimal(SENSOR_SIZE_DICT[sensorSize].height);
+      const rawFocalLength = new Decimal(focalLength);
+      const targetDistance = new Decimal(distance);
+      const rawFNumber = new Decimal(fNumber);
+      const aspectRatioWidth = new Decimal(
+        ASPECT_RATIO_DICT[aspectRatio].width,
+      );
+      const aspectRatioHeight = new Decimal(
+        ASPECT_RATIO_DICT[aspectRatio].height,
+      );
+
+      // 実際に撮影で使用している範囲を計算
+      // (アスペクト比の情報から自動回転)
+      const [actualSensorWidth, actualSensorHeight] = calcActualSensorSize(
+        sensorWidth,
+        sensorHeight,
+        aspectRatioWidth,
+        aspectRatioHeight,
+      );
+
+      let text = `センサーサイズ：${SENSOR_SIZE_DICT[sensorSize].name}(${SENSOR_SIZE_DICT[sensorSize].width}x${SENSOR_SIZE_DICT[sensorSize].height}mm)\n`;
+      text += `有効センサーサイズ：${actualSensorWidth.toString()}x${actualSensorHeight.toString()}mm`;
 
       // チェック完了後の処理
       return text;
