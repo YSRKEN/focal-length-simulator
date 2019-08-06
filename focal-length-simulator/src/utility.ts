@@ -1,5 +1,12 @@
 import Decimal from 'decimal.js';
 
+/**
+ * センサーサイズのうち、実際に使用されている大きさを算出する。なお、アスペクト比が縦向きの場合は自動回転する
+ * @param sensorWidth センサーサイズ(長辺)
+ * @param sensorHeight センサーサイズ(短辺)
+ * @param aspectRatioWidth アスペクト比(横)
+ * @param aspectRatioHeight アスペクト比(縦)
+ */
 export const calcActualSensorSize = (
   sensorWidth: Decimal,
   sensorHeight: Decimal,
@@ -49,4 +56,58 @@ export const calcActualSensorSize = (
       ];
     }
   }
+};
+
+/**
+ * 水平・垂直・対角画角を計算
+ * @param actualSensorWidth 使用する水平センサーサイズ
+ * @param actualSensorHeight 使用する垂直センサーサイズ
+ * @param rawFocalLength 焦点距離
+ */
+export const calcAngleOfView = (
+  actualSensorWidth: Decimal,
+  actualSensorHeight: Decimal,
+  rawFocalLength: Decimal,
+) => {
+  const angleWidth = actualSensorWidth
+    .div(rawFocalLength.mul(2))
+    .atan()
+    .mul(2);
+  const angleHeight = actualSensorHeight
+    .div(rawFocalLength.mul(2))
+    .atan()
+    .mul(2);
+  const actualSensorDiagonal = actualSensorWidth
+    .mul(actualSensorWidth)
+    .add(actualSensorHeight.mul(actualSensorHeight))
+    .sqrt();
+  const angleDiagonal = actualSensorDiagonal
+    .div(rawFocalLength.mul(2))
+    .atan()
+    .mul(2);
+  return [angleWidth, angleHeight, angleDiagonal];
+};
+
+/**
+ * 水平・垂直・対角の撮影可能範囲を計算
+ * @param actualSensorWidth 使用する水平センサーサイズ
+ * @param actualSensorHeight 使用する垂直センサーサイズ
+ * @param rawFocalLength 焦点距離
+ * @param targetDistance 対象との距離
+ */
+export const calcPhotoArea = (
+  actualSensorWidth: Decimal,
+  actualSensorHeight: Decimal,
+  rawFocalLength: Decimal,
+  targetDistance: Decimal,
+) => {
+  const actualSensorDiagonal = actualSensorWidth
+    .mul(actualSensorWidth)
+    .add(actualSensorHeight.mul(actualSensorHeight))
+    .sqrt();
+  return [
+    targetDistance.mul(actualSensorWidth).div(rawFocalLength),
+    targetDistance.mul(actualSensorHeight).div(rawFocalLength),
+    targetDistance.mul(actualSensorDiagonal).div(rawFocalLength),
+  ];
 };

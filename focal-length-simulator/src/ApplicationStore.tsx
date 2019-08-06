@@ -1,7 +1,11 @@
 import React from 'react';
 import { Action, SENSOR_SIZE_DICT, ASPECT_RATIO_DICT } from './constant';
 import { Decimal } from 'decimal.js';
-import { calcActualSensorSize } from './utility';
+import {
+  calcActualSensorSize,
+  calcAngleOfView,
+  calcPhotoArea,
+} from './utility';
 
 const useStore = () => {
   const [sensorSize, setSensorSize] = React.useState('6');
@@ -67,8 +71,39 @@ const useStore = () => {
         aspectRatioHeight,
       );
 
-      let text = `センサーサイズ：${SENSOR_SIZE_DICT[sensorSize].name}(${SENSOR_SIZE_DICT[sensorSize].width}x${SENSOR_SIZE_DICT[sensorSize].height}mm)\n`;
-      text += `有効センサーサイズ：${actualSensorWidth.toString()}x${actualSensorHeight.toString()}mm`;
+      // 画角を計算
+      const [angleWidth, angleHeight, angleDiagonal] = calcAngleOfView(
+        actualSensorWidth,
+        actualSensorHeight,
+        rawFocalLength,
+      );
+      const radToDeg = new Decimal(180).div(Decimal.acos(-1));
+      const angleWidth2 = angleWidth.mul(radToDeg);
+      const angleHeight2 = angleHeight.mul(radToDeg);
+      const angleDiagonal2 = angleDiagonal.mul(radToDeg);
+
+      // 撮影可能範囲を計算
+      const [
+        photoAreaWidth,
+        photoAreaHeight,
+        photoAreaDiagonal,
+      ] = calcPhotoArea(
+        actualSensorWidth,
+        actualSensorHeight,
+        rawFocalLength,
+        targetDistance,
+      );
+
+      let text = `センサーサイズ：\n　${SENSOR_SIZE_DICT[sensorSize].name}(${SENSOR_SIZE_DICT[sensorSize].width}x${SENSOR_SIZE_DICT[sensorSize].height}mm)\n`;
+      text += `有効センサーサイズ：\n　${actualSensorWidth.toFixed(
+        1,
+      )}x${actualSensorHeight.toFixed(1)}mm\n`;
+      text += `水平・垂直・対角画角：\n　${angleWidth2.toFixed(
+        1,
+      )}°・${angleHeight2.toFixed(1)}°・${angleDiagonal2.toFixed(1)}°\n`;
+      text += `水平・垂直・対角撮影範囲：\n　${photoAreaWidth.toFixed(
+        2,
+      )}m・${photoAreaHeight.toFixed(2)}m・${photoAreaDiagonal.toFixed(2)}m`;
 
       // チェック完了後の処理
       return text;
