@@ -111,3 +111,45 @@ export const calcPhotoArea = (
     targetDistance.mul(actualSensorDiagonal).div(rawFocalLength),
   ];
 };
+
+/**
+ * 前後・合計の被写界深度を計算
+ * @param sensorWidth センサーサイズ(長辺)
+ * @param sensorHeight センサーサイズ(短辺)
+ * @param rawFocalLength 焦点距離
+ * @param targetDistance 対象との距離
+ * @param rawFNumber Fナンバー
+ */
+export const calcFocalDepth = (
+  sensorWidth: Decimal,
+  sensorHeight: Decimal,
+  rawFocalLength: Decimal,
+  targetDistance: Decimal,
+  rawFNumber: Decimal,
+) => {
+  // 許容錯乱円径の計算
+  // (許容錯乱円径は、フルサイズが1/30mm・マイクロフォーサーズを1/60mmとして、面積比の平方根に比例するようにする)
+  const circleDiameter = new Decimal(1).div(30).mul(
+    sensorWidth
+      .mul(sensorHeight)
+      .div(new Decimal(36 * 24))
+      .sqrt(),
+  );
+
+  // 被写界深度を計算
+  const a = targetDistance.mul(1000);
+  const b = circleDiameter
+    .mul(rawFNumber)
+    .mul(a)
+    .mul(a);
+  const c = rawFocalLength.mul(rawFocalLength);
+  const d = circleDiameter.mul(rawFNumber).mul(a);
+  const forwardFocalDepth = b.div(c.add(d)).div(1000);
+  const backFocalDepth = b.div(c.sub(d)).div(1000);
+
+  return [
+    forwardFocalDepth,
+    backFocalDepth,
+    forwardFocalDepth.add(backFocalDepth),
+  ];
+};

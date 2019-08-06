@@ -5,6 +5,7 @@ import {
   calcActualSensorSize,
   calcAngleOfView,
   calcPhotoArea,
+  calcFocalDepth,
 } from './utility';
 
 const useStore = () => {
@@ -94,16 +95,29 @@ const useStore = () => {
         targetDistance,
       );
 
+      // 被写界深度を計算
+      // (許容錯乱円径は、フルサイズが1/30mm・マイクロフォーサーズを1/60mmとして、面積比の平方根に比例するようにする)
+      const [forwardFocalDepth, backFocalDepth, allFocalDepth] = calcFocalDepth(
+        sensorWidth,
+        sensorHeight,
+        rawFocalLength,
+        targetDistance,
+        rawFNumber,
+      );
+
       let text = `センサーサイズ：\n　${SENSOR_SIZE_DICT[sensorSize].name}(${SENSOR_SIZE_DICT[sensorSize].width}x${SENSOR_SIZE_DICT[sensorSize].height}mm)\n`;
-      text += `有効センサーサイズ：\n　${actualSensorWidth.toFixed(
-        1,
+      text += `有効センサーサイズ：\n　${actualSensorWidth.toPrecision(
+        3,
       )}x${actualSensorHeight.toFixed(1)}mm\n`;
-      text += `水平・垂直・対角画角：\n　${angleWidth2.toFixed(
-        1,
-      )}°・${angleHeight2.toFixed(1)}°・${angleDiagonal2.toFixed(1)}°\n`;
-      text += `水平・垂直・対角撮影範囲：\n　${photoAreaWidth.toFixed(
-        2,
-      )}m・${photoAreaHeight.toFixed(2)}m・${photoAreaDiagonal.toFixed(2)}m`;
+      text += `水平・垂直・対角画角：\n　${angleWidth2.toPrecision(
+        3,
+      )}°・${angleHeight2.toFixed(1)}°・${angleDiagonal2.toPrecision(3)}°\n`;
+      text += `水平・垂直・対角撮影範囲：\n　${photoAreaWidth.toPrecision(
+        3,
+      )}m・${photoAreaHeight.toFixed(3)}m・${photoAreaDiagonal.toFixed(3)}m\n`;
+      text += `前・後・合計被写界深度：\n　${forwardFocalDepth.toPrecision(
+        3,
+      )}m・${backFocalDepth.toPrecision(3)}m・${allFocalDepth.toPrecision(3)}m`;
 
       // チェック完了後の処理
       return text;
