@@ -6,14 +6,25 @@ import {
   calcAngleOfView,
   calcPhotoArea,
   calcFocalDepth,
+  loadSetting,
+  saveSetting,
+  decimalMeterToString,
 } from './utility';
 
 const useStore = () => {
-  const [sensorSize, setSensorSize] = React.useState('6');
-  const [focalLength, setFocalLength] = React.useState('50');
-  const [distance, setDistance] = React.useState('2.0');
-  const [fNumber, setFNumber] = React.useState('1.7');
-  const [aspectRatio, setAspectRatio] = React.useState('3');
+  const [sensorSize, setSensorSize] = React.useState(
+    loadSetting('sensorSize', '6'),
+  );
+  const [focalLength, setFocalLength] = React.useState(
+    loadSetting('focalLength', '50'),
+  );
+  const [distance, setDistance] = React.useState(
+    loadSetting('distance', '2.0'),
+  );
+  const [fNumber, setFNumber] = React.useState(loadSetting('fNumber', '1.7'));
+  const [aspectRatio, setAspectRatio] = React.useState(
+    loadSetting('aspectRatio', '3'),
+  );
   const [result, setResult] = React.useState('');
 
   React.useEffect(() => {
@@ -26,18 +37,23 @@ const useStore = () => {
     switch (action.type) {
       case 'setSensorSize':
         setSensorSize(action.message);
+        saveSetting('sensorSize', action.message);
         break;
       case 'setFocalLength':
         setFocalLength(action.message);
+        saveSetting('focalLength', action.message);
         break;
       case 'setDistance':
         setDistance(action.message);
+        saveSetting('distance', action.message);
         break;
       case 'setFNumber':
         setFNumber(action.message);
+        saveSetting('fNumber', action.message);
         break;
       case 'setAspectRatio':
         setAspectRatio(action.message);
+        saveSetting('aspectRatio', action.message);
     }
   };
 
@@ -97,7 +113,12 @@ const useStore = () => {
 
       // 被写界深度を計算
       // (許容錯乱円径は、フルサイズが1/30mm・マイクロフォーサーズを1/60mmとして、面積比の平方根に比例するようにする)
-      const [forwardFocalDepth, backFocalDepth, allFocalDepth] = calcFocalDepth(
+      const [
+        circleDiameter,
+        forwardFocalDepth,
+        backFocalDepth,
+        allFocalDepth,
+      ] = calcFocalDepth(
         sensorWidth,
         sensorHeight,
         rawFocalLength,
@@ -115,9 +136,12 @@ const useStore = () => {
       text += `水平・垂直・対角撮影範囲：\n　${photoAreaWidth.toPrecision(
         3,
       )}m・${photoAreaHeight.toFixed(3)}m・${photoAreaDiagonal.toFixed(3)}m\n`;
-      text += `前・後・合計被写界深度：\n　${forwardFocalDepth.toPrecision(
-        3,
-      )}m・${backFocalDepth.toPrecision(3)}m・${allFocalDepth.toPrecision(3)}m`;
+      text += `許容錯乱円径：\n　${circleDiameter.toPrecision(3)}mm\n`;
+      text += `前・後・合計被写界深度：\n　${decimalMeterToString(
+        forwardFocalDepth,
+      )}・${decimalMeterToString(backFocalDepth)}・${decimalMeterToString(
+        allFocalDepth,
+      )}`;
 
       // チェック完了後の処理
       return text;

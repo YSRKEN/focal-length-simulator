@@ -88,7 +88,7 @@ const CalcForm: React.FC = () => {
       </Form.Group>
       <Form.Group>
         <Form.Label>計算結果</Form.Label>
-        <Form.Control as="textarea" rows="10" readOnly value={context.result} />
+        <Form.Control as="textarea" rows="12" readOnly value={context.result} />
       </Form.Group>
     </Form>
   );
