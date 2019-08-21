@@ -170,8 +170,29 @@ export const calcFocalDepth = (
   const backFocalDepth = b.div(c.sub(d)).div(1000);
 
   return [
+    circleDiameter,
     forwardFocalDepth,
     backFocalDepth,
     forwardFocalDepth.add(backFocalDepth),
   ];
+};
+
+/**
+ * [m]単位の距離を文字列に変換
+ * @param length 距離[m]
+ */
+export const decimalMeterToString = (length: Decimal) => {
+  if (length.isNegative()) {
+    return '∞m';
+  }
+  if (length.mul(1000).comparedTo(1) < 0) {
+    return length.mul(1000000).toFixed(1) + 'μm';
+  }
+  if (length.mul(100).comparedTo(1) < 0) {
+    return length.mul(1000).toFixed(1) + 'mm';
+  }
+  if (length.comparedTo(1) < 0) {
+    return length.mul(100).toFixed(1) + 'cm';
+  }
+  return length.toFixed(1) + 'm';
 };

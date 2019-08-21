@@ -8,6 +8,7 @@ import {
   calcFocalDepth,
   loadSetting,
   saveSetting,
+  decimalMeterToString,
 } from './utility';
 
 const useStore = () => {
@@ -112,7 +113,12 @@ const useStore = () => {
 
       // 被写界深度を計算
       // (許容錯乱円径は、フルサイズが1/30mm・マイクロフォーサーズを1/60mmとして、面積比の平方根に比例するようにする)
-      const [forwardFocalDepth, backFocalDepth, allFocalDepth] = calcFocalDepth(
+      const [
+        circleDiameter,
+        forwardFocalDepth,
+        backFocalDepth,
+        allFocalDepth,
+      ] = calcFocalDepth(
         sensorWidth,
         sensorHeight,
         rawFocalLength,
@@ -130,9 +136,12 @@ const useStore = () => {
       text += `水平・垂直・対角撮影範囲：\n　${photoAreaWidth.toPrecision(
         3,
       )}m・${photoAreaHeight.toFixed(3)}m・${photoAreaDiagonal.toFixed(3)}m\n`;
-      text += `前・後・合計被写界深度：\n　${forwardFocalDepth.toPrecision(
-        3,
-      )}m・${backFocalDepth.toPrecision(3)}m・${allFocalDepth.toPrecision(3)}m`;
+      text += `許容錯乱円径：\n　${circleDiameter.toPrecision(3)}mm\n`;
+      text += `前・後・合計被写界深度：\n　${decimalMeterToString(
+        forwardFocalDepth,
+      )}・${decimalMeterToString(backFocalDepth)}・${decimalMeterToString(
+        allFocalDepth,
+      )}`;
 
       // チェック完了後の処理
       return text;
